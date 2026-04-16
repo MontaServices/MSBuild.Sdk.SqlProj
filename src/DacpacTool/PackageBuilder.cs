@@ -282,7 +282,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
 
             if (_dllReferenced)
             {
-                packageOptions.IgnoreValidationErrors = [ "SR0025" ];
+                packageOptions.IgnoreValidationErrors = [ "SR0025" ]; // https://github.com/microsoft/DacFx/issues/462
             }
 
             DacPackageExtensions.BuildPackage(outputFile.FullName, Model, Metadata, packageOptions);
