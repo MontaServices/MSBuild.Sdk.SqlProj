@@ -113,8 +113,10 @@
       <_TransitiveAssemblyReference Include="%(_DacpacReferenceDirectory.Identity)\*.dll" />
 
       <!-- Unified list of assembly references flowing into the build. Only file paths ending in .dll are considered
-           to avoid accidentally including simple-name system references that MSBuild may inject. -->
-      <AssemblyReference Include="@(Reference)" Condition="'%(Extension)' == '.dll'" />
+           to avoid accidentally including simple-name system references that MSBuild may inject. Framework/reference
+           assemblies contributed implicitly by the target framework (e.g. NETStandard.Library) are excluded via the
+           NuGetPackageId metadata check; such assemblies are not CLR assemblies that should be deployed. -->
+      <AssemblyReference Include="@(Reference)" Condition="'%(Extension)' == '.dll' AND '%(Reference.NuGetPackageId)' == ''" />
       <AssemblyReference Include="@(_ResolvedProjectReferencePaths)" Condition="'%(Extension)' == '.dll'" />
       <AssemblyReference Include="@(_TransitiveAssemblyReference)" />
     </ItemGroup>
