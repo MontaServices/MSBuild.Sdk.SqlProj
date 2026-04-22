@@ -4,7 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides targets for projects that result into a data-tier application package (DACPAC).</Description>
     <PackageTags>MSBuild MSBuildSdk sql dacpac</PackageTags>
-    <PackageProjectUrl>https://github.com/rr-wfm/MSBuild.Sdk.SqlProj/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/MontaServices/MSBuild.Sdk.SqlProj</PackageProjectUrl>
+    <Authors>Monta Services</Authors>
   </PropertyGroup>
 
   <PropertyGroup>
