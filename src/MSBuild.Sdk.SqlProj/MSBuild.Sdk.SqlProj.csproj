@@ -6,7 +6,6 @@
     <PackageTags>MSBuild MSBuildSdk sql dacpac</PackageTags>
     <PackageProjectUrl>https://github.com/MontaServices/MSBuild.Sdk.SqlProj</PackageProjectUrl>
     <Authors>Monta Services</Authors>
-    <RepositoryUrl>https://github.com/MontaServices/MSBuild.Sdk.SqlProj</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>
