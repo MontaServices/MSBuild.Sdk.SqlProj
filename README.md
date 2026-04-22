@@ -4,7 +4,7 @@ To push a new version to our private NuGet feed:
 - Merge your changes to the `feature/assembly-ref-after-monta-release` branch
 - Checkout the branch
 - Make sure your changes are committed (this raises the package version)
-- Create a new NuGet package version: in the `MSBuild.Sdk.SqlProj` directory: `dotnet pack`
+- Create a new NuGet package version: in the `src/MSBuild.Sdk.SqlProj` directory: `dotnet pack`
 - Allow classic personal access tokens in the organisation settings
 - Create a personal access token in your settings with `write:packages` scope and authorise with SSO
 - Add local package source: `dotnet nuget add source --name "github-MontaServices" https://nuget.pkg.github.com/MontaServices/index.json --username USERNAME --password PAT --store-password-in-clear-text` (replace USERNAME and PAT)
