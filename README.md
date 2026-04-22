@@ -1,3 +1,17 @@
+This is a fork by Monta. 
+
+To push a new version to our private NuGet feed:
+- Merge your changes to the `feature/assembly-ref-after-monta-release` branch
+- Checkout the branch
+- Create a new NuGet package version: in the `MSBuild.Sdk.SqlProj` directory: `dotnet pack`
+- Allow classic personal access tokens in the organisation settings
+- Create a personal access token in your settings with `write:packages` scope and authorise with SSO
+- Add local package source: `dotnet nuget add source --name "github-MontaServices" https://nuget.pkg.github.com/MontaServices/index.json --username USERNAME --password PAT --store-password-in-clear-text` (replace USERNAME and PAT)
+- Push package to source: `dotnet nuget push .\bin\Release\NUGETPACKAGEFILE --source "github-MontaServices" --api-key PAT` (replace NUGETPACKAGEFILE and PAT)
+- Remove package source: `dotnet nuget remove source "github-MontaServices"`
+- Delete personal access token 
+- Disallow classic personal access tokens in the organisation settings
+
 # MSBuild.Sdk.SqlProj
 
 ![Build Status](https://github.com/jmezach/MSBuild.Sdk.SqlProj/workflows/CI/badge.svg)
