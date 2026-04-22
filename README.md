@@ -6,12 +6,15 @@ To push a new version to our private NuGet feed:
 - Make sure your changes are committed (this raises the package version)
 - Create a new NuGet package version: in the `src/MSBuild.Sdk.SqlProj` directory: `dotnet pack`
 - Allow classic personal access tokens in the organisation settings
-- Create a personal access token in your settings with `write:packages` scope and authorise with SSO
+- Create a classic personal access token in your settings with `write:packages` scope 
+- Copy your token
+- Configure SSO authorisation on your token
 - Add local package source: `dotnet nuget add source --name "github-MontaServices" https://nuget.pkg.github.com/MontaServices/index.json --username USERNAME --password PAT --store-password-in-clear-text` (replace USERNAME and PAT)
 - Push package to source: `dotnet nuget push .\bin\Release\NUGETPACKAGEFILE --source "github-MontaServices" --api-key PAT` (replace NUGETPACKAGEFILE and PAT)
+Cleanup: 
 - Remove package source: `dotnet nuget remove source "github-MontaServices"`
 - Delete personal access token 
-- Disallow classic personal access tokens in the organisation settings
+- Disallow (restrict) classic personal access tokens in the organisation settings
 
 # MSBuild.Sdk.SqlProj
 
