@@ -11,7 +11,7 @@ Starting with version 2.7.0 of the SDK, there is support for running static code
 Static code analysis can be enabled by adding the `RunSqlCodeAnalysis` property to the project file:
 
 ```xml
-<Project Sdk="MSBuild.Sdk.SqlProj/4.1.1">
+<Project Sdk="MSBuild.Sdk.SqlProj/4.2.0">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RunSqlCodeAnalysis>True</RunSqlCodeAnalysis>
@@ -47,7 +47,7 @@ Any rule violations found during analysis are reported as build warnings.
 Individual rule violations or groups of rules can be configured to be reported as build errors as shown below.
 
 ```xml
-<Project Sdk="MSBuild.Sdk.SqlProj/4.1.1">
+<Project Sdk="MSBuild.Sdk.SqlProj/4.2.0">
   <PropertyGroup>
     <RunSqlCodeAnalysis>True</RunSqlCodeAnalysis>
     <CodeAnalysisRules>+!SqlServer.Rules.SRN0005;+!SqlServer.Rules.SRD*</CodeAnalysisRules>
@@ -83,4 +83,4 @@ They are based on these older repositories:
 
 You can also build your own rules. For an example of how to build a custom rule, see [this blog post](https://erikej.github.io/dacfx/dotnet/2024/04/04/dacfx-rules.html).
 
-To publish your own custom rules, pack your rule .dll in a NuGet package as shown in this rule project file [from GitHub](https://github.com/ErikEJ/SqlServer.Rules/blob/master/SqlServer.Rules/SqlServer.Rules.csproj).
+To publish your own custom rules, pack your rule .dll in a NuGet package as shown in this rule project file [from GitHub](https://github.com/ErikEJ/SqlServer.Rules/blob/master/src/SqlServer.Rules/SqlServer.Rules.csproj).
