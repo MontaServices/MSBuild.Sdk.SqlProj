@@ -80,7 +80,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
                 "Expected CREATE ASSEMBLY [SqlClrTestLibrary] in dacpac.");
 
             // Assert - a procedure that references the deferred function is also present and its
-            // dependency was correctly resolved (i.e. it was deferred transitively and re-added).
+            // dependency was correctly resolved.
             var procedure = model.GetObject(Procedure.TypeClass,
                 new ObjectIdentifier("dbo", "usp_SelectOne"), DacQueryScopes.Default);
             procedure.ShouldNotBeNull("Expected stored procedure [dbo].[usp_SelectOne] in dacpac.");

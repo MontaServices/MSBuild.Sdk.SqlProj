@@ -76,6 +76,9 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
         [CliOption(Description = "JSON config file for ER diagram generation", Name = "--erdiagramconfig", Required = false, Alias = "-edc")]
         public FileInfo[] ErDiagramConfig { get; set; }
 
+        [CliOption(Description = "When True, code is added to the pre-deployment script to trust each referenced SQL CLR assembly (via sys.sp_add_trusted_assembly) before CREATE ASSEMBLY runs. Default: False.", Name = "--clrassemblytrustinpredeploy", Required = false)]
+        public bool ClrAssemblyTrustInPreDeploy { get; set; }
+
         public async Task<int> RunAsync()
         {
             return await Program.BuildDacpac(this).ConfigureAwait(false);
