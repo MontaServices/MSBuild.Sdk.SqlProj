@@ -117,11 +117,13 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
             }
         }
 
-        public void AddPreDeploymentScript(FileInfo script, FileInfo outputFile)
+        public void AddPreDeploymentScript(FileInfo script, FileInfo outputFile, bool clrAssemblyTrustInPreDeploy)
         {
             ArgumentNullException.ThrowIfNull(outputFile);
 
-            AddScript(script, outputFile, "/predeploy.sql");
+            var trustAssembliesScript = clrAssemblyTrustInPreDeploy && _dllReferences.Count > 0 ? BuildTrustAssembliesScript(_dllReferences) : null;
+
+            AddScript(script, outputFile, "/predeploy.sql", trustAssembliesScript);
         }
 
         public void AddPostDeploymentScript(FileInfo script, FileInfo outputFile)
@@ -129,6 +131,64 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
             ArgumentNullException.ThrowIfNull(outputFile);
 
             AddScript(script, outputFile, "/postdeploy.sql");
+        }
+        
+        private static string BuildTrustAssembliesScript(List<string> assemblies)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("-- BEGIN MSBuild.Sdk.SqlProj: trust referenced SQL CLR assemblies");
+            sb.AppendLine("IF OBJECT_ID('tempdb..#is_assembly_trusted') IS NOT NULL DROP PROCEDURE #is_assembly_trusted;");
+            sb.AppendLine("GO");
+            sb.AppendLine("CREATE PROCEDURE #is_assembly_trusted @hash varbinary(64)");
+            sb.AppendLine("AS");
+            sb.AppendLine("BEGIN");
+            sb.AppendLine("    RETURN IIF(EXISTS (SELECT * FROM sys.trusted_assemblies WHERE [hash] = @hash), 1, 0);");
+            sb.AppendLine("END");
+            sb.AppendLine("GO");
+
+            foreach (var assemblyPath in assemblies)
+            {
+                var assemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
+                // Compute the SHA-512 hash at build time so the predeploy script only carries the
+                // 64-byte hash literal instead of the full assembly bytes (those are already
+                // embedded once in the corresponding CREATE ASSEMBLY ... FROM 0x... statement).
+                var hashHex = Convert.ToHexString(ComputeSha512(assemblyPath));
+                var safeName = assemblyName.Replace("'", "''", StringComparison.OrdinalIgnoreCase);
+
+                sb.AppendLine($"-- Trust assembly: {assemblyName}");
+                sb.AppendLine($"DECLARE @name sysname = N'{safeName}';");
+                sb.AppendLine("DECLARE @description nvarchar(4000) = @name;");
+                sb.AppendLine($"DECLARE @hash varbinary(64) = 0x{hashHex};");
+                sb.AppendLine("DECLARE @is_assembly_trusted bit;");
+                sb.AppendLine("EXEC @is_assembly_trusted = #is_assembly_trusted @hash;");
+                sb.AppendLine("IF @is_assembly_trusted = 1");
+                sb.AppendLine("BEGIN");
+                sb.AppendLine("    PRINT 'Assembly ' + @name + ' already trusted';");
+                sb.AppendLine("END");
+                sb.AppendLine("ELSE");
+                sb.AppendLine("BEGIN");
+                sb.AppendLine("    PRINT 'Assembly ' + @name + ' not trusted yet, trusting...';");
+                sb.AppendLine("    EXEC sys.sp_add_trusted_assembly @hash = @hash, @description = @description;");
+                sb.AppendLine("    EXEC @is_assembly_trusted = #is_assembly_trusted @hash;");
+                sb.AppendLine("    IF @is_assembly_trusted = 0");
+                sb.AppendLine("    BEGIN");
+                sb.AppendLine("        DECLARE @msg nvarchar(max) = CONCAT('Trusting the assembly ', @name, ' failed. This may be caused by a lack of permissions. Execute the following command manually on the server to trust the assembly, then re-run the pipeline. declare @description nvarchar(4000) = ''', @description, '''; exec sys.sp_add_trusted_assembly @hash = ', CONVERT(varchar(max), @hash, 1), ', @description = @description');");
+                sb.AppendLine("        ;THROW 50000, @msg, 1;");
+                sb.AppendLine("    END");
+                sb.AppendLine("    PRINT 'Assembly ' + @name + ' trusted';");
+                sb.AppendLine("END");
+                sb.AppendLine("GO");
+            }
+
+            sb.AppendLine("-- END MSBuild.Sdk.SqlProj: trust referenced SQL CLR assemblies");
+            return sb.ToString();
+        }
+
+        private static byte[] ComputeSha512(string filePath)
+        {
+            using var sha = System.Security.Cryptography.SHA512.Create();
+            using var stream = File.OpenRead(filePath);
+            return sha.ComputeHash(stream);
         }
 
         public bool ValidateModel()
@@ -451,40 +511,58 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
             }
         }
 
-        private void AddScript(FileInfo script, FileInfo outputFile, string path)
+        private void AddScript(FileInfo script, FileInfo outputFile, string path, params string[] appendBefore)
         {
             if (_modelValid != true)
             {
                 throw new InvalidOperationException("Cannot add pre and post scripts before model has been validated.");
             }
 
-            if (script == null)
+            if (script == null
+                && (appendBefore == null || appendBefore.Length == 0))
             {
                 return;
             }
 
-            if (!script.Exists)
+            if (script != null && !script.Exists)
             {
                 throw new ArgumentException($"Unable to find script file {script.FullName}", nameof(script));
             }
 
             using (var package = Package.Open(outputFile.FullName, FileMode.Open, FileAccess.ReadWrite))
             {
-                _console.WriteLine($"Adding {script.FullName} to package");
-                WritePart(script, package, path);
+                var partContentsBuilder = new StringBuilder();
+
+                if (appendBefore != null)
+                {
+                    foreach (var content in appendBefore)
+                    {
+                        partContentsBuilder.AppendLine(content);
+                    }
+                }
+
+                if (script != null)
+                {
+                    _console.WriteLine($"Adding {script.FullName} to package");
+
+                    using var parser = new ScriptParser(script.FullName, new IncludeVariableResolver());
+                    var partContents = parser.GenerateScript();
+                    partContentsBuilder.AppendLine(partContents);
+                }
+
+                WritePart(partContentsBuilder.ToString(), package, path);
 
                 package.Close();
             }
         }
 
-        private static void WritePart(FileInfo file, Package package, string path)
+        private static void WritePart(string partContents, Package package, string path)
         {
             var part = package.CreatePart(new Uri(path, UriKind.Relative), "text/plain");
 
             using (var stream = part.GetStream())
             {
-                using var parser = new ScriptParser(file.FullName, new IncludeVariableResolver());
-                var buffer = Encoding.UTF8.GetBytes(parser.GenerateScript());
+                var buffer = Encoding.UTF8.GetBytes(partContents);
                 stream.Write(buffer, 0, buffer.Length);
             }
         }
