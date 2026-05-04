@@ -5,7 +5,7 @@
     <PackageId>Monta.MSBuild.Sdk.SqlProj</PackageId>
     <Description>Provides targets for projects that result into a data-tier application package (DACPAC).</Description>
     <PackageTags>MSBuild MSBuildSdk sql dacpac</PackageTags>
-    <PackageProjectUrl>https://github.com/MontaServices/MSBuild.Sdk.SqlProj/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/MontaServices/MSBuild.Sdk.SqlProj/tree/feature/assembly-ref-after-xml-monta</PackageProjectUrl>
     <Authors>https://github.com/MontaServices,https://github.com/rr-wfm</Authors>
   </PropertyGroup>
 
