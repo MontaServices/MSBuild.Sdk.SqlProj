@@ -40,24 +40,13 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
             // Ensure that the model has been created
             EnsureModelCreated();
 
-            string referenceType = ValidateReference(referenceFile);
+            ValidateReference(referenceFile);
 
-            if (referenceType == "dacpac")
-            {
-                _console.WriteLine($"Adding reference to {referenceFile} with external parts {externalParts} and SuppressMissingDependenciesErrors {suppressErrorsForMissingDependencies}");
-                Model.AddReference(referenceFile, externalParts, suppressErrorsForMissingDependencies);
-            }
-            else if (referenceType == "dll")
-            {
-                _dllReferences.Add(referenceFile);        
-            }
-            else // This should never be hit since ValidateReference will throw for invalid file types
-            {
-                throw new InvalidOperationException($"Invalid reference type {referenceType}");
-            }
+            _console.WriteLine($"Adding reference to {referenceFile} with external parts {externalParts} and SuppressMissingDependenciesErrors {suppressErrorsForMissingDependencies}");
+            Model.AddReference(referenceFile, externalParts, suppressErrorsForMissingDependencies);
         }
 
-        private static string ValidateReference(string referenceFile)
+        private static void ValidateReference(string referenceFile)
         {
             // Make sure the file exists
             if (!File.Exists(referenceFile))
@@ -67,17 +56,36 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
 
             // Make sure the file is a .dacpac file
             string fileType = Path.GetExtension(referenceFile);
-            if (fileType.Equals(".dacpac", StringComparison.OrdinalIgnoreCase))
+            if (!fileType.Equals(".dacpac", StringComparison.OrdinalIgnoreCase))
             {
-                return "dacpac";
+                throw new ArgumentException($"Invalid filetype {fileType}, was expecting .dacpac", nameof(referenceFile));
             }
-            else if (fileType.Equals(".dll", StringComparison.OrdinalIgnoreCase))
+        }
+
+        public void AddAssemblyReference(string referenceFile)
+        {
+            // Ensure that the model has been created
+            EnsureModelCreated();
+
+            ValidateAssemblyReference(referenceFile);
+
+            _console.WriteLine($"Adding assembly reference to {referenceFile}");
+            _dllReferences.Add(referenceFile);
+        }
+
+        private static void ValidateAssemblyReference(string referenceFile)
+        {
+            // Make sure the file exists
+            if (!File.Exists(referenceFile))
             {
-                return "dll";
+                throw new ArgumentException($"Unable to find reference file {referenceFile}", nameof(referenceFile));
             }
-            else
+
+            // Make sure the file is a .dacpac file
+            string fileType = Path.GetExtension(referenceFile);
+            if (!fileType.Equals(".dll", StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException($"Invalid filetype {fileType}, was expecting .dacpac or .dll", nameof(referenceFile));
+                throw new ArgumentException($"Invalid filetype {fileType}, was expecting .dll", nameof(referenceFile));
             }
         }
 

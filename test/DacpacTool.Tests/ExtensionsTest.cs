@@ -272,7 +272,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
             var postDeploymentScript = package.GetPostDeploymentScript();
             postDeploymentScript.ShouldContain("PRINT 'Inserting record into MyTable'");
             postDeploymentScript.ShouldContain("ALTER ROLE db_datareader ADD MEMBER [DbReader];");
-            postDeploymentScript.ShouldEndWith($"{Environment.NewLine}GO{Environment.NewLine}");
+            postDeploymentScript.ShouldEndWith($"{Environment.NewLine}GO{Environment.NewLine}{Environment.NewLine}");
         }
 
         [TestMethod]
