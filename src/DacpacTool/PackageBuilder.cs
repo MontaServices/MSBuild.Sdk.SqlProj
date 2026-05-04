@@ -285,6 +285,9 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
 
             if (_dllReferences.Count > 0)
             {
+                // Ignore "AllReferencesMustBeResolved" error where there are assemblies
+                // since we are adding the referenced assemblies manually to the package 
+                // and those references will always show as unresolved during build time.
                 var newIngnoreValidationErrors = new List<string>();
                 if (packageOptions.IgnoreValidationErrors != null)
                 {
