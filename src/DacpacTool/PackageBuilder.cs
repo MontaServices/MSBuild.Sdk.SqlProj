@@ -81,7 +81,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
                 throw new ArgumentException($"Unable to find reference file {referenceFile}", nameof(referenceFile));
             }
 
-            // Make sure the file is a .dacpac file
+            // Make sure the file is a .dll file
             string fileType = Path.GetExtension(referenceFile);
             if (!fileType.Equals(".dll", StringComparison.OrdinalIgnoreCase))
             {
