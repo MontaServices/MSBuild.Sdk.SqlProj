@@ -27,6 +27,9 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
         
         [CliOption(Description = "Reference(s) to include", Required = false, Name = "--reference", Alias = "-r")]
         public string[] Reference { get; set; }
+    
+        [CliOption(Description = "Assembly reference(s) to include", Required = false, Name = "--assemblyreference", Alias = "-asm")]
+        public string[] AssemblyReference { get; set; }
         
         [CliOption(Description = "Build properties to be set on the model", Name = "--buildproperty", Required = false, Alias = "-bp")]
         public string[] BuildProperty { get; set; }
@@ -75,6 +78,9 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
 
         [CliOption(Description = "JSON config file for ER diagram generation", Name = "--erdiagramconfig", Required = false, Alias = "-edc")]
         public FileInfo[] ErDiagramConfig { get; set; }
+
+        [CliOption(Description = "When True, code is added to the pre-deployment script to trust each referenced SQL CLR assembly (via sys.sp_add_trusted_assembly) before CREATE ASSEMBLY runs. Default: False.", Name = "--clrassemblytrustinpredeploy", Required = false)]
+        public bool ClrAssemblyTrustInPreDeploy { get; set; }
 
         public async Task<int> RunAsync()
         {

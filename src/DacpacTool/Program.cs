@@ -79,6 +79,15 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
                 }
             }
 
+            // Add assembly references to the model
+            if (options.AssemblyReference != null)
+            {
+                foreach (var assemblyReference in options.AssemblyReference)
+                {
+                    packageBuilder.AddAssemblyReference(assemblyReference);
+                }
+            }
+
             // Add SqlCmdVariables to the package (if defined)
             if (options.SqlCmdVar != null)
             {
@@ -145,7 +154,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool
             packageBuilder.SaveToDisk(options.Output, new PackageOptions() { RefactorLogPath = options.RefactorLog?.FullName });
 
             // Add predeployment and postdeployment scripts (must happen after SaveToDisk)
-            packageBuilder.AddPreDeploymentScript(options.PreDeploy, options.Output);
+            packageBuilder.AddPreDeploymentScript(options.PreDeploy, options.Output, options.ClrAssemblyTrustInPreDeploy);
             packageBuilder.AddPostDeploymentScript(options.PostDeploy, options.Output);
 
             if (options.GenerateCreateScript)

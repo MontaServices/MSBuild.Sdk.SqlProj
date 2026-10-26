@@ -263,7 +263,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
             var preDeploymentFile = new FileInfo("../../../../TestProjectWithPrePost/Pre-Deployment/Script.PreDeployment.sql");
             var postDeploymentFile = new FileInfo("../../../../TestProjectWithPrePost/Post-Deployment/Script.Post Deployment.sql");
 
-            packageBuilder.AddPreDeploymentScript(preDeploymentFile, tempFile);
+            packageBuilder.AddPreDeploymentScript(preDeploymentFile, tempFile, clrAssemblyTrustInPreDeploy: false);
             packageBuilder.AddPostDeploymentScript(postDeploymentFile, tempFile);
 
             using var package = DacPackage.Load(tempFile.FullName);
@@ -272,7 +272,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
             var postDeploymentScript = package.GetPostDeploymentScript();
             postDeploymentScript.ShouldContain("PRINT 'Inserting record into MyTable'");
             postDeploymentScript.ShouldContain("ALTER ROLE db_datareader ADD MEMBER [DbReader];");
-            postDeploymentScript.ShouldEndWith($"{Environment.NewLine}GO{Environment.NewLine}");
+            postDeploymentScript.ShouldEndWith($"{Environment.NewLine}GO{Environment.NewLine}{Environment.NewLine}");
         }
 
         [TestMethod]

@@ -13,7 +13,7 @@
     <packageTypes>
       <packageType name="$packagetype$" />
     </packageTypes>
-    <repository type="git" url="https://github.com/rr-wfm/MSBuild.Sdk.SqlProj/" />
+    <repository type="git" url="https://github.com/MontaServices/MSBuild.Sdk.SqlProj/" />
     <readme>docs\README.md</readme>
   </metadata>
   <files>

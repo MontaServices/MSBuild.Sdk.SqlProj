@@ -86,19 +86,19 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
         }
 
         [TestMethod]
-        public void AddReference_FileIsNotDacpac()
+        public void AddReference_FileIsNotDacpacOrDll()
         {
             // Arrange
             string reference = new TestModelBuilder()
                 .AddStoredProcedure("MyStoredProcedure", "SELECT 1;")
-                .SaveAsPackage(".dll");
+                .SaveAsPackage(".zip");
 
             var packageBuilder = new PackageBuilder(new TestConsole());
             packageBuilder.UsingVersion(SqlServerVersion.Sql160);
 
             // Act & Assert
             Should.Throw<ArgumentException>(() =>  packageBuilder.AddReference(reference))
-                    .Message.ShouldStartWith("Invalid filetype .dll");
+                    .Message.ShouldStartWith("Invalid filetype .zip");
 
             // Cleanup
             File.Delete(reference);
@@ -297,7 +297,8 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
 
             packageBuilder.AddPreDeploymentScript(
                 new FileInfo("../../../../TestProjectWithPrePost/Pre-Deployment/Script.PreDeployment.sql"),
-                tempFile);
+                tempFile,
+                clrAssemblyTrustInPreDeploy: false);
 
             packageBuilder.AddPostDeploymentScript(
                 new FileInfo("../../../../TestProjectWithPrePost/Post-Deployment/Script.Post Deployment.sql"),
@@ -340,7 +341,8 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
             // Act
             packageBuilder.AddPreDeploymentScript(
                 null,
-                tempFile);
+                tempFile,
+                clrAssemblyTrustInPreDeploy: false);
 
             // Assert
             var package = Package.Open(tempFile.FullName);
@@ -426,7 +428,7 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
 
 
             // Act & Assert
-            Should.Throw<InvalidOperationException>(() => packageBuilder.AddPreDeploymentScript(null, tempFile));
+            Should.Throw<InvalidOperationException>(() => packageBuilder.AddPreDeploymentScript(null, tempFile, clrAssemblyTrustInPreDeploy: false));
         }
 
         [TestMethod]
@@ -457,7 +459,8 @@ namespace MSBuild.Sdk.SqlProj.DacpacTool.Tests
             // Act & Assert
             Should.Throw<ArgumentException>(() => packageBuilder.AddPreDeploymentScript(
                 new FileInfo("NonExistingScript.PreDeployment.sql"),
-                tempFile));
+                tempFile,
+                clrAssemblyTrustInPreDeploy: false));
 
             // Cleanup
             tempFile.Delete();
